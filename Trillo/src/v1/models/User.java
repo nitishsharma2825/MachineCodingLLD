@@ -1,15 +1,19 @@
 package v1.models;
 
+import v1.services.RandomIDGenerator;
+
+import java.util.UUID;
+
 public class User {
     private String id;
     private String name;
     private String email;
 
-    public User(String id, String name, String email) {
-        this.id = id;
+    public User(String name) {
+        this.id = RandomIDGenerator.generateRandomString(7);
         this.name = name;
-        this.email = email;
     }
+    public User() { }
 
     public String getId() {
         return id;

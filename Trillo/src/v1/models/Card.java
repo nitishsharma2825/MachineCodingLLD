@@ -12,6 +12,7 @@ public class Card {
     public Card(String name) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
+        this.assignedUser = new User();
     }
 
     public String getId() {

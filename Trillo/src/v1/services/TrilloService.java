@@ -11,7 +11,7 @@ public class TrilloService {
     private List<Board> boards;
     private Map<String, Board> idBoardMapping;
     private Map<String, Board> channelIdBoardMappings;
-    private Map<String, Board> cardIdBoardMappings;
+    private Map<String, Channel> cardIdChannelMappings;
     public TrilloService() {
         this.boards = new ArrayList<>();
         idBoardMapping = new HashMap<>();
@@ -81,7 +81,7 @@ public class TrilloService {
     public void modifyChannel(String channelId, Attribute attribute) {
         Board modifyBoard = channelIdBoardMappings.get(channelId);
         if(modifyBoard == null){
-            System.out.println("Board: "+" "+id+ " does not exist");
+            System.out.println("Channel: "+" "+channelId+ " does not exist");
             return;
         }
 
@@ -114,8 +114,48 @@ public class TrilloService {
             return null;
         }
         board.getChannel(channelId).getCards().add(card);
-        cardIdBoardMappings.put(card.getId(), board);
+        cardIdChannelMappings.put(card.getId(), board.getChannel(channelId));
         return card.getId();
+    }
+
+    public void modifyCard(String cardId, Attribute attribute){
+        Channel channel = cardIdChannelMappings.get(cardId);
+        Board board = channelIdBoardMappings.get(channel.getId());
+        Card card = channel.getCard(cardId);
+
+        switch (attribute.getFieldName().equalsIgnoreCase()) {
+            case "assign":
+                User user = board.getMember(((NameAttribute)attribute).getFieldValue());
+                card.setAssignedUser(user);
+                break;
+            case "unassign":
+                card.setAssignedUser(new User());
+                break;
+            default:
+                System.out.println("No such attribute in board");
+        }
+    }
+
+    public void show(){
+        for(Board board: boards){
+            showBoard(board);
+        }
+    }
+
+    public void showBoard(Board board){
+        board.display();
+    }
+
+    public void showChannel(String channelId){
+        Board board = channelIdBoardMappings.get(channelId);
+        Channel channel = board.getChannel(channelId);
+        channel.display();
+    }
+
+    public void showCard(String cardId){
+        Channel channel = cardIdChannelMappings.get(cardId);
+        Card card = channel.getCard(cardId);
+        card.display();
     }
 
 }

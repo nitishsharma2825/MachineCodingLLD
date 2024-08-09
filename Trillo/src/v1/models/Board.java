@@ -60,6 +60,16 @@ public class Board {
         this.members = members;
     }
 
+    public User getMember(String name){
+        for(User user: getMembers()){
+            if(user.getName().equals(name)){
+                return user;
+            }
+        }
+
+        return null;
+    }
+
     public List<Channel> getChannels() {
         return channels;
     }
