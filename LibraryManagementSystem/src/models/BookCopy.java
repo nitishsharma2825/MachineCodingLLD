@@ -53,6 +53,17 @@ public class BookCopy {
         return dueDate;
     }
 
+    @Override
+    public String toString() {
+        return "BookCopy{" +
+                "book=" + book +
+                ", rackNo=" + rackNo +
+                ", id='" + id + '\'' +
+                ", borrowedBy=" + borrowedBy +
+                ", dueDate=" + dueDate +
+                '}';
+    }
+
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
