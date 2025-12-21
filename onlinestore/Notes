@@ -1,0 +1,4 @@
+mvn clean compile
+mvn clean test
+
+Mock repositories in service tests
