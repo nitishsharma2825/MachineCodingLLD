@@ -15,6 +15,11 @@ public class Cart {
     public Cart(CustomerId id) {
         this.id = id;
     }
+
+    public CustomerId id() {
+        return id;
+    }
+
     public void addProduct(Product product, int quantity) throws NotEnoughItemsInStockException {
         lineItems
                 .computeIfAbsent(product.id(), ignored -> new CartLineItem(product))

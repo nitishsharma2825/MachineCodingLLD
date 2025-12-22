@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface ProductRepository {
     List<Product> findByNameOrDescription(String query);
-
+    void save(Product product);
     Optional<Product> findById(ProductId productId);
 }
