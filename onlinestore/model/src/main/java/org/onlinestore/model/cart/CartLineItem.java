@@ -9,9 +9,9 @@ public class CartLineItem {
     private final Product product;
     private int quantity;
 
-    public CartLineItem(Product product) {
+    public CartLineItem(Product product, int quantity) {
         this.product = product;
-        this.quantity = 0;
+        this.quantity = quantity;
     }
 
     public Product product() {

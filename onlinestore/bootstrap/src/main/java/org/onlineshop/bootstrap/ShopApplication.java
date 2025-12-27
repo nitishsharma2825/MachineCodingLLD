@@ -1,5 +1,6 @@
 package org.onlineshop.bootstrap;
 
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.ws.rs.core.Application;
 import org.onlineshop.in.rest.cart.AddToCartController;
 import org.onlineshop.in.rest.cart.EmptyCartController;
@@ -7,6 +8,9 @@ import org.onlineshop.in.rest.cart.GetCartController;
 import org.onlineshop.in.rest.product.FindProductsController;
 import org.onlineshop.out.persistence.inmemory.InMemoryCartRepository;
 import org.onlineshop.out.persistence.inmemory.InMemoryProductRepository;
+import org.onlineshop.out.persistence.mysql.EntityManagerFactoryFactory;
+import org.onlineshop.out.persistence.mysql.MySQLCartRepository;
+import org.onlineshop.out.persistence.mysql.MySQLProductRepository;
 import org.onlinestore.application.port.in.cart.AddToCartUseCase;
 import org.onlinestore.application.port.in.cart.EmptyCartUseCase;
 import org.onlinestore.application.port.in.cart.GetCartUseCase;
@@ -36,8 +40,25 @@ public class ShopApplication extends Application {
     }
 
     private void initPersistenceAdapters() {
+        String persistence = System.getProperty("persistence", "inmemory");
+        switch (persistence) {
+            case "inmemory" -> initInMemoryAdapters();
+            case "mysql" -> initMySQLAdapters();
+            default -> throw new IllegalArgumentException("Invalid persistence property");
+        }
+    }
+
+    private void initInMemoryAdapters() {
         cartRepository = new InMemoryCartRepository();
         productRepository = new InMemoryProductRepository();
+    }
+
+    private void initMySQLAdapters() {
+        EntityManagerFactory entityManagerFactory = EntityManagerFactoryFactory.createMySQLEntityManagerFactory(
+          "jdbc:mysql://localhost:3306/shop", "root", "test"
+        );
+        cartRepository = new MySQLCartRepository(entityManagerFactory);
+        productRepository = new MySQLProductRepository(entityManagerFactory);
     }
 
     private AddToCartController addToCartController() {

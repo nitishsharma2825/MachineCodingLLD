@@ -22,8 +22,12 @@ public class Cart {
 
     public void addProduct(Product product, int quantity) throws NotEnoughItemsInStockException {
         lineItems
-                .computeIfAbsent(product.id(), ignored -> new CartLineItem(product))
+                .computeIfAbsent(product.id(), ignored -> new CartLineItem(product, 0))
                 .increaseQuantityBy(quantity, product.itemsInStock());
+    }
+
+    public void putProductIgnoringNotEnoughItemsInStock(Product product, int quantity) {
+        lineItems.put(product.id(), new CartLineItem(product, quantity));
     }
 
     public List<CartLineItem> lineItems() {
