@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ParkingLot {
     private int numSpots;
@@ -11,7 +12,7 @@ public class ParkingLot {
     private List<Ticket> allTickets;
     private List<ParkingSpot> allParkingSpots;
     private HashSet<ParkingSpotId> parkingSpotsOccupied;
-
+    private ReentrantLock lock = new ReentrantLock();
     public ParkingLot(int numSpots) {
         this.parkingLotId = ParkingLotId.randomParkingLotId();
         this.allTickets = new ArrayList<>();
@@ -22,23 +23,28 @@ public class ParkingLot {
     }
 
     public Ticket assignSpot(VehicleType vehicleType) throws NoParkingSpotAvailableException {
-        ParkingSpotId parkingSpotId = null;
-        SpotType spotType = this.convertVehicleToSpotType(vehicleType);
-        for(ParkingSpot parkingSpot: this.allParkingSpots){
-            if(parkingSpot.spotType().equals(spotType) && !this.parkingSpotsOccupied.contains(parkingSpot.parkingSpotId())){
-                parkingSpotId = parkingSpot.parkingSpotId();
-                break;
+        lock.lock();
+        try {
+            ParkingSpotId parkingSpotId = null;
+            SpotType spotType = this.convertVehicleToSpotType(vehicleType);
+            for(ParkingSpot parkingSpot: this.allParkingSpots){
+                if(parkingSpot.spotType().equals(spotType) && !this.parkingSpotsOccupied.contains(parkingSpot.parkingSpotId())){
+                    parkingSpotId = parkingSpot.parkingSpotId();
+                    break;
+                }
             }
-        }
 
-        if (parkingSpotId == null) {
-            throw new NoParkingSpotAvailableException("No spot available!");
-        }
+            if (parkingSpotId == null) {
+                throw new NoParkingSpotAvailableException("No spot available!");
+            }
 
-        this.parkingSpotsOccupied.add(parkingSpotId);
-        Ticket ticket = new Ticket(parkingSpotId, System.currentTimeMillis());
-        this.allTickets.add(ticket);
-        return ticket;
+            this.parkingSpotsOccupied.add(parkingSpotId);
+            Ticket ticket = new Ticket(parkingSpotId, System.currentTimeMillis());
+            this.allTickets.add(ticket);
+            return ticket;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public long generateFair(TicketId ticketId) throws InvalidTicketException {

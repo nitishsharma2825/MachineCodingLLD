@@ -19,6 +19,7 @@ public class Driver {
                     TicketId ticketId = new TicketId(commands[1]);
                     long fare = parkingLot.generateFair(ticketId);
                     System.out.println("Your fair is: " + fare);
+                    break;
                 case "end":
                     exit = true;
             }
