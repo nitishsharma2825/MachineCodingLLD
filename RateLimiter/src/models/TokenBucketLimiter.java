@@ -71,6 +71,6 @@ public class TokenBucketLimiter implements Limiter {
 
     @Override
     public void evictStaleEntries() {
-
+        System.out.println("evicting stale entries for token bucket");
     }
 }

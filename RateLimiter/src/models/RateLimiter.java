@@ -19,6 +19,15 @@ public class RateLimiter {
         }
 
         this.defaultLimiter = LimiterFactory.create(defaultConfig);
+
+        Thread evictionThread = new Thread(() -> {
+            while(true) {
+                evictStaleEntriesPerEndpoint();
+            }
+        });
+
+        evictionThread.setDaemon(false);
+        evictionThread.start();
     }
 
     public void reloadConfig(List<Map<String, Object>> configs, Map<String, Object> defaultConfig) {
@@ -32,6 +41,10 @@ public class RateLimiter {
 
         this.limiters = newLimiters;
         this.defaultLimiter = LimiterFactory.create(defaultConfig);
+
+        // other approach
+        // for each limiter, call evictEntries() and handle eviction inside that
+        // this will help preserve per clientID state
     }
 
     public RateLimitResult allow(String clientId, String endpoint) {

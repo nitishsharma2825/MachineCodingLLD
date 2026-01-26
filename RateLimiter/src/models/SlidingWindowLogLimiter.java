@@ -44,7 +44,7 @@ public class SlidingWindowLogLimiter implements Limiter {
 
     @Override
     public void evictStaleEntries() {
-
+        System.out.println("evicting stale entries for sliding window");
     }
 
     private static class RequestLog {
