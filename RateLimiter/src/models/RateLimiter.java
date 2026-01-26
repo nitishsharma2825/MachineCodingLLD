@@ -3,11 +3,16 @@ package models;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RateLimiter {
-    /// Map of <endpoint, limiter>
-    private Map<String, Limiter> limiters;
-    private Limiter defaultLimiter;
+    // Map of <endpoint, limiter>
+    // preserves happens before relationship before and after volatile writes
+    private volatile Map<String, Limiter> limiters;
+    private volatile Limiter defaultLimiter;
+    private ScheduledExecutorService executor;
 
     public RateLimiter(List<Map<String, Object>> configs, Map<String, Object> defaultConfig) {
         this.limiters = new HashMap<>();
@@ -20,14 +25,30 @@ public class RateLimiter {
 
         this.defaultLimiter = LimiterFactory.create(defaultConfig);
 
-        Thread evictionThread = new Thread(() -> {
-            while(true) {
-                evictStaleEntriesPerEndpoint();
-            }
-        });
+//        Thread evictionThread = new Thread(() -> {
+//            while(true) {
+//                evictStaleEntriesPerEndpoint();
+//            }
+//        });
+//
+//        evictionThread.setDaemon(false);
+//        evictionThread.start();
 
-        evictionThread.setDaemon(false);
-        evictionThread.start();
+//        this.executor = Executors.newFixedThreadPool(1);
+//        executor.submit(() -> {
+//            while (true) {
+//                Thread.sleep(1000);
+//                evictStaleEntriesPerEndpoint();
+//            }
+//        });
+
+        this.executor = Executors.newSingleThreadScheduledExecutor();
+        this.executor.scheduleWithFixedDelay(
+                this::evictStaleEntriesPerEndpoint,
+                1,
+                60,
+                TimeUnit.SECONDS
+        );
     }
 
     public void reloadConfig(List<Map<String, Object>> configs, Map<String, Object> defaultConfig) {
@@ -56,5 +77,9 @@ public class RateLimiter {
         for (Map.Entry<String, Limiter> limiters: this.limiters.entrySet()) {
             limiters.getValue().evictStaleEntries();
         }
+    }
+
+    public void shutdown() {
+        this.executor.shutdown();
     }
 }

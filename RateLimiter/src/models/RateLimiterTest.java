@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,5 +51,29 @@ class RateLimiterTest {
                 break;
             }
         }
+    }
+
+    @Test
+    void testConcurrency() throws InterruptedException {
+        // to make all threads wait till all are ready
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch endLatch = new CountDownLatch(10);
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
+        try {
+            for (int i = 0; i < 100000; i++) {
+                startLatch.await();
+                executor.submit(() -> {
+                    RateLimitResult result = this.rateLimiter.allow("1", "/search");
+                });
+                endLatch.countDown();
+            }
+        } catch (Exception e) {
+
+        }
+
+        startLatch.countDown();
+        endLatch.await();
+        executor.shutdown();
     }
 }
